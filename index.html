@@ -7,6 +7,24 @@
 </head>
 <body>
   <h1 id="title">Hello World</h1>
+  <button id="toneButton">Play Tone</button>
+
+  <script>
+    document.getElementById('toneButton').addEventListener('click', function() {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(261.63, audioCtx.currentTime); // middle C
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
+      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.5);
+    });
+  </script>
 
   <script src="./script.js"></script>
 </body>
