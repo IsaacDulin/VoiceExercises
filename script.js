@@ -111,6 +111,147 @@ function randomize() {
   }
 }
 
+// Function to initialize and handle the range slider
+function initializeRangeSlider() {
+  const rangeSlider = document.getElementById('vocalRangeSlider');
+  const minKnob = document.getElementById('minKnob');
+  const maxKnob = document.getElementById('maxKnob');
+  const rangeFill = document.getElementById('rangeFill');
+  const rangeDisplay = document.getElementById('rangeDisplay');
+  
+  if (!rangeSlider || !minKnob || !maxKnob || !rangeFill) return;
+  
+  // Create a simple solution - use 24 positions (2 octaves below to 2 octaves above)
+  // C2 to B6 would be: 6 octaves * 12 notes = 72 positions
+  // But for simplicity and visibility, we'll use a manageable range
+  
+  // Working with 60 positions (C2 to B6) 
+  let minPosition = 0;   // C2 (position 0)
+  let maxPosition = 59;  // B6 (position 59)
+  
+  // List of all possible notes for the range (C2 to B6)
+  const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  
+  // Convert position to note name and octave
+  function positionToNote(position) {
+    if (position < 0) position = 0;
+    if (position > 59) position = 59;
+    
+    const octave = Math.floor(position / 12) + 2;  // Octaves 2-6
+    const noteIndex = position % 12;
+    const noteName = allNotes[noteIndex];
+    return noteName + octave;
+  }
+  
+  // Update display with current range
+  function updateDisplay() {
+    const minNote = positionToNote(minPosition);
+    const maxNote = positionToNote(maxPosition);
+    if (rangeDisplay) {
+      rangeDisplay.textContent = `Range: ${minNote} to ${maxNote} (${minNote}-${maxNote})`;
+    }
+    console.log(`Range updated: ${minNote} to ${maxNote}`);
+  }
+  
+  // Update visual position of knobs
+  function updateKnobPositions() {
+    const sliderWidth = rangeSlider.offsetWidth;
+    const minPercent = (minPosition / 59) * 100;
+    const maxPercent = (maxPosition / 59) * 100;
+    
+    minKnob.style.left = minPercent + '%';
+    maxKnob.style.left = maxPercent + '%';
+    
+    // Update range fill
+    const leftPercent = minPercent;
+    const widthPercent = maxPercent - minPercent;
+    rangeFill.style.left = leftPercent + '%';
+    rangeFill.style.width = widthPercent + '%';
+    
+    updateDisplay();
+  }
+  
+  // Make knobs draggable
+  function makeKnobDraggable(knob, isMin) {
+    let isDragging = false;
+    
+    knob.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      
+      const rect = rangeSlider.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      
+      let newPosition = Math.round((percent / 100) * 59);
+      
+      // Ensure positions don't cross
+      if (isMin) {
+        if (newPosition >= maxPosition) newPosition = maxPosition - 1;
+        minPosition = newPosition;
+      } else {
+        if (newPosition <= minPosition) newPosition = minPosition + 1;
+        maxPosition = newPosition;
+      }
+      
+      updateKnobPositions();
+    });
+    
+    document.addEventListener('mouseup', function() {
+      isDragging = false;
+    });
+    
+    // Touch events for mobile support
+    knob.addEventListener('touchstart', function(e) {
+      isDragging = true;
+      e.preventDefault();
+    });
+    
+    document.addEventListener('touchmove', function(e) {
+      if (!isDragging) return;
+      
+      const rect = rangeSlider.getBoundingClientRect();
+      const x = e.touches[0].clientX - rect.left;
+      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      
+      let newPosition = Math.round((percent / 100) * 59);
+      
+      // Ensure positions don't cross
+      if (isMin) {
+        if (newPosition >= maxPosition) newPosition = maxPosition - 1;
+        minPosition = newPosition;
+      } else {
+        if (newPosition <= minPosition) newPosition = minPosition + 1;
+        maxPosition = newPosition;
+      }
+      
+      updateKnobPositions();
+    });
+    
+    document.addEventListener('touchend', function() {
+      isDragging = false;
+    });
+  }
+  
+  // Initialize with default range (C2 to B6)
+  minPosition = 0;   // C2
+  maxPosition = 59;  // B6
+  
+  // Initialize sliders
+  makeKnobDraggable(minKnob, true);
+  makeKnobDraggable(maxKnob, false);
+  
+  // Initial update
+  updateKnobPositions();
+  
+  // Add debugging for the initialization
+  console.log('Range slider initialized with C2 (0) to B6 (59)');
+}
+
 // Add event listener to the tone button when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
   const toneButton = document.getElementById('toneButton');
@@ -140,6 +281,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (randomizeButton) {
     randomizeButton.addEventListener('click', randomize);
   }
+  
+  // Initialize range slider
+  initializeRangeSlider();
 });
 
 console.log("Hello from script.js");
