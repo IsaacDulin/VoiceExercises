@@ -6,25 +6,33 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <h1 id="title">Hello World</h1>
+  <h1 id="title">Voice Exercises</h1>
+  <label for="exerciseType">Exercise Type:</label>
+  <select id="exerciseType" name="exerciseType">
+    <option value="scale">Scale</option>
+    <option value="arpeggio">Arpeggio</option>
+  </select>
+  <br><br>
+  <label for="pitchClass">Pitch Class:</label>
+  <select id="pitchClass" name="pitchClass">
+    <option value="C">C</option>
+    <option value="C#">C#</option>
+    <option value="D">D</option>
+    <option value="D#">D#</option>
+    <option value="E">E</option>
+    <option value="F">F</option>
+    <option value="F#">F#</option>
+    <option value="G">G</option>
+    <option value="G#">G#</option>
+    <option value="A">A</option>
+    <option value="A#">A#</option>
+    <option value="B">B</option>
+  </select>
+  <br><br>
+  <label for="octaveSlider">Octave: <span id="octaveValue">0</span></label>
+  <input type="range" id="octaveSlider" name="octaveSlider" min="-2" max="2" value="0">
+  <br><br>
   <button id="toneButton">Play Tone</button>
-
-  <script>
-    document.getElementById('toneButton').addEventListener('click', function() {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(261.63, audioCtx.currentTime); // middle C
-      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
-      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.5);
-    });
-  </script>
 
   <script src="./script.js"></script>
 </body>
