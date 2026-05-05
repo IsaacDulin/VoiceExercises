@@ -9,14 +9,14 @@ function playTone() {
   // Get pitch class from dropdown
   const pitchClassSelect = document.getElementById('pitchClass');
   const pitchClass = pitchClassSelect ? pitchClassSelect.value : 'C';
-
+  
   // Get octave from slider
   const octaveSlider = document.getElementById('octaveSlider');
   const octave = octaveSlider ? parseInt(octaveSlider.value) : 0;
   
   // Define frequency patterns for different pitch classes
   let frequencies;
-
+  
   // Map pitch classes to their base frequencies (in Hz)
   const baseFrequencies = {
     'C': 261.63,
@@ -32,10 +32,10 @@ function playTone() {
     'A#': 466.16,
     'B': 493.88
   };
-
+  
   // Get the base frequency for the selected pitch class
   const baseFreq = baseFrequencies[pitchClass];
-
+  
   if (exerciseType === 'scale') {
     // Major scale: Tonic, Second, Third, Fourth, Fifth, Sixth, Seventh, Octave
     const scaleNotes = [0, 2, 4, 5, 7, 9, 11, 12]; // semitone intervals for major scale
@@ -79,11 +79,44 @@ function playTone() {
   });
 }
 
+// Function to randomize all selections
+function randomize() {
+  // Array of possible values
+  const exerciseTypes = ['scale', 'arpeggio'];
+  const pitchClasses = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const octaves = [-2, -1, 0, 1, 2];
+  
+  // Get the dropdowns and slider
+  const exerciseTypeSelect = document.getElementById('exerciseType');
+  const pitchClassSelect = document.getElementById('pitchClass');
+  const octaveSlider = document.getElementById('octaveSlider');
+  
+  // Set random values
+  if (exerciseTypeSelect) {
+    exerciseTypeSelect.value = exerciseTypes[Math.floor(Math.random() * exerciseTypes.length)];
+  }
+  
+  if (pitchClassSelect) {
+    pitchClassSelect.value = pitchClasses[Math.floor(Math.random() * pitchClasses.length)];
+  }
+  
+  if (octaveSlider) {
+    octaveSlider.value = octaves[Math.floor(Math.random() * octaves.length)];
+    
+    // Update the display value
+    const octaveValue = document.getElementById('octaveValue');
+    if (octaveValue) {
+      octaveValue.textContent = octaveSlider.value;
+    }
+  }
+}
+
 // Add event listener to the tone button when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
   const toneButton = document.getElementById('toneButton');
   const octaveSlider = document.getElementById('octaveSlider');
   const octaveValue = document.getElementById('octaveValue');
+  const randomizeButton = document.getElementById('randomizeButton');
   
   if (toneButton) {
     toneButton.addEventListener('click', playTone);
@@ -96,6 +129,16 @@ document.addEventListener('DOMContentLoaded', function() {
         octaveValue.textContent = this.value;
       }
     });
+    
+    // Initialize display on page load
+    if (octaveValue) {
+      octaveValue.textContent = octaveSlider.value;
+    }
+  }
+  
+  // Add event listener to randomize button
+  if (randomizeButton) {
+    randomizeButton.addEventListener('click', randomize);
   }
 });
 
