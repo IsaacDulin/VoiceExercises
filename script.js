@@ -120,7 +120,12 @@ function randomize() {
     exerciseTypeSelect.value = exerciseTypes[Math.floor(Math.random() * exerciseTypes.length)];
   }
 
-  // Generate a single random number between 0 and 59 for the vocal range
+  // TODO: Get vocal range values from the sliders (not hardcoded like this)
+  const minPosition = 0; // C2 (assuming the minimum is C2)
+  const maxPosition = 71; // B7 (assuming the maximum is B7)
+  
+
+  // Use the fixed full range to maintain compatibility with the existing setPitchClassAndOctaveFromPosition function
   const randomPosition = Math.floor(Math.random() * 60); // 0 to 59 inclusive
   const pitchData = setPitchClassAndOctaveFromPosition(randomPosition);
   
@@ -196,70 +201,78 @@ function initializeRangeSlider() {
   }
   
   // Make knobs draggable
-  function makeKnobDraggable(knob, isMin) {
-    let isDragging = false;
+    function makeKnobDraggable(knob, isMin) {
+      let isDragging = false;
     
-    knob.addEventListener('mousedown', function(e) {
-      isDragging = true;
-      e.preventDefault();
-    });
+      knob.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        e.preventDefault();
+      });
     
-    document.addEventListener('mousemove', function(e) {
-      if (!isDragging) return;
+      document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
       
-      const rect = rangeSlider.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const rect = rangeSlider.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
       
-      let newPosition = Math.round((percent / 100) * 71);
+        let newPosition = Math.round((percent / 100) * 71);
       
-      // Ensure positions don't cross
-      if (isMin) {
-        if (newPosition >= maxPosition) newPosition = maxPosition - 1;
-        minPosition = newPosition;
-      } else {
-        if (newPosition <= minPosition) newPosition = minPosition + 1;
-        maxPosition = newPosition;
-      }
+        // Ensure positions don't cross and maintain at least one octave range (12 positions)
+        if (isMin) {
+          // Minimum can't exceed max - 12 positions (one octave)
+          const maxAllowed = maxPosition - 12;
+          if (newPosition >= maxAllowed) newPosition = maxAllowed;
+          minPosition = newPosition;
+        } else {
+          // Maximum can't be less than min + 12 positions (one octave)
+          const minAllowed = minPosition + 12;
+          if (newPosition <= minAllowed) newPosition = minAllowed;
+          maxPosition = newPosition;
+        }
       
-      updateKnobPositions();
-    });
+        updateKnobPositions();
+      });
     
-    document.addEventListener('mouseup', function() {
-      isDragging = false;
-    });
+      document.addEventListener('mouseup', function() {
+        isDragging = false;
+      });
     
-    // Touch events for mobile support
-    knob.addEventListener('touchstart', function(e) {
-      isDragging = true;
-      e.preventDefault();
-    });
+      // Touch events for mobile support
+      knob.addEventListener('touchstart', function(e) {
+        isDragging = true;
+        e.preventDefault();
+      });
     
-    document.addEventListener('touchmove', function(e) {
-      if (!isDragging) return;
+      document.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
       
-      const rect = rangeSlider.getBoundingClientRect();
-      const x = e.touches[0].clientX - rect.left;
-      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const rect = rangeSlider.getBoundingClientRect();
+        const x = e.touches[0].clientX - rect.left;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
       
-      let newPosition = Math.round((percent / 100) * 71);
+        let newPosition = Math.round((percent / 100) * 71);
       
-      // Ensure positions don't cross
-      if (isMin) {
-        if (newPosition >= maxPosition) newPosition = maxPosition - 1;
-        minPosition = newPosition;
-      } else {
-        if (newPosition <= minPosition) newPosition = minPosition + 1;
-        maxPosition = newPosition;
-      }
+        // Ensure positions don't cross and maintain at least one octave range (12 positions)
+        if (isMin) {
+          // Minimum can't exceed max - 12 positions (one octave)
+          const maxAllowed = maxPosition - 12;
+          if (newPosition >= maxAllowed) newPosition = maxAllowed;
+          minPosition = newPosition;
+        } else {
+          // Maximum can't be less than min + 12 positions (one octave)
+          const minAllowed = minPosition + 12;
+          if (newPosition <= minAllowed) newPosition = minAllowed;
+          maxPosition = newPosition;
+        }
       
-      updateKnobPositions();
-    });
+        updateKnobPositions();
+      });
     
-    document.addEventListener('touchend', function() {
-      isDragging = false;
-    });
-  }
+      document.addEventListener('touchend', function() {
+        isDragging = false;
+      });
+    }
   
   // Initialize with default range (C2 to B7)
   minPosition = 0;   // C2
