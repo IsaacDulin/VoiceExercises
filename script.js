@@ -5,20 +5,18 @@ let globalMaxPosition = 71;  // B7 (position 71)
 // Global audio context - created on first user interaction
 let audioCtx = null;
 
-// Function to initialize audio context on first user interaction
-function initializeAudioContext() {
+// Function to play a scale or arpeggio based on dropdown selection
+function playTone() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     console.log('Audio context initialized');
   }
-  return audioCtx;
-}
-
-
-// Function to play a scale or arpeggio based on dropdown selection
-function playTone() {
-    // Initialize audio context on first user interaction if not already initialized
-  const ctx = initializeAudioContext();
+  
+  // Check if audio context needs to be resumed (common on mobile browsers)
+  if (audioCtx && audioCtx.state === 'suspended') {
+    console.log('Resuming suspended audio context');
+    audioCtx.resume();
+  }
   
   // Get exercise type from dropdown
   const exerciseTypeSelect = document.getElementById('exerciseType');
@@ -63,6 +61,10 @@ function playTone() {
       // Major arpeggio: Tonic, Third, Fifth, Octave
       const arpeggioNotes = [0, 4, 7, 12, 7, 4, 0]; // semitone intervals for major arpeggio
       frequencies = arpeggioNotes.map(interval => baseFreq * Math.pow(2, interval/12));
+     } else if (exerciseType === 'slide') {
+      // Slide / 1-5-1 arpeggio: Tonic, Fifth, Tonic
+      const arpeggioNotes = [0, 7, 0]; 
+      frequencies = arpeggioNotes.map(interval => baseFreq * Math.pow(2, interval/12));
     } else {
       // Default to middle C
       frequencies = [baseFreq];
@@ -74,11 +76,11 @@ function playTone() {
   const noteDuration = 0.3; // seconds per note
   const gapBetweenNotes = 0.05; // small gap
   const totalTimePerNote = noteDuration + gapBetweenNotes;
-  let startTime = ctx.currentTime + 0.01; // small delay to start
+  let startTime = audioCtx.currentTime + 0.01; // small delay to start
   
   frequencies.forEach((frequency, index) => {
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
     
     oscillator.type = 'sine';
     oscillator.frequency.setValueAtTime(frequency, startTime);
@@ -89,7 +91,7 @@ function playTone() {
     gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
     
     oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    gainNode.connect(audioCtx.destination);
     
     oscillator.start(startTime);
     oscillator.stop(startTime + noteDuration);
@@ -377,5 +379,3 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize range slider
   initializeRangeSlider();
 });
-
-console.log("Hello from script.js");
