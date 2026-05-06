@@ -79,8 +79,35 @@ function playTone() {
   });
 }
 
+// Function to set pitch class and octave based on position (0-59)
+function setPitchClassAndOctaveFromPosition(position) {
+  // Position mapping:
+  // 0 = C2 (octave -2)
+  // 59 = B6 (octave +2)
+  
+  // All notes in our 60-position range (C2 to B6)
+  const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  
+  // Validate position range
+  if (position < 0) position = 0;
+  if (position > 59) position = 59;
+  
+  // Calculate octave (C2 = 0, C3 = 12, C4 = 24, C5 = 36, C6 = 48)
+  const octave = Math.floor(position / 12) - 2; // -2 to +2 octaves
+  
+  // Get note index in the 12-note chromatic scale
+  const noteIndex = position % 12;
+  const noteName = allNotes[noteIndex];
+
+}
+  
+  // Get the dropdown elements
 // Function to randomize all selections
 function randomize() {
+  // Get current vocal range positions (C2=0 to B7=71)
+  const minKnob = document.getElementById('minKnob');
+  const maxKnob = document.getElementById('maxKnob');
+  
   // Array of possible values
   const exerciseTypes = ['scale', 'arpeggio'];
   const pitchClasses = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -91,23 +118,23 @@ function randomize() {
   const pitchClassSelect = document.getElementById('pitchClass');
   const octaveSlider = document.getElementById('octaveSlider');
   
-  // Set random values
+  // Set exercise type randomly (unchanged from original)
   if (exerciseTypeSelect) {
     exerciseTypeSelect.value = exerciseTypes[Math.floor(Math.random() * exerciseTypes.length)];
   }
-  
+
   if (pitchClassSelect) {
     pitchClassSelect.value = pitchClasses[Math.floor(Math.random() * pitchClasses.length)];
   }
-  
+
   if (octaveSlider) {
     octaveSlider.value = octaves[Math.floor(Math.random() * octaves.length)];
-    
     // Update the display value
     const octaveValue = document.getElementById('octaveValue');
     if (octaveValue) {
       octaveValue.textContent = octaveSlider.value;
     }
+
   }
 }
 
@@ -121,23 +148,20 @@ function initializeRangeSlider() {
   
   if (!rangeSlider || !minKnob || !maxKnob || !rangeFill) return;
   
-  // Create a simple solution - use 24 positions (2 octaves below to 2 octaves above)
-  // C2 to B6 would be: 6 octaves * 12 notes = 72 positions
-  // But for simplicity and visibility, we'll use a manageable range
-  
-  // Working with 60 positions (C2 to B6) 
+  // Create a solution for 6 octaves: C2 to B7 (6 octaves * 12 notes = 72 positions)
+  // But we're going to work with C2 to B7 (which is 6 octaves from C2 to B7)
   let minPosition = 0;   // C2 (position 0)
-  let maxPosition = 59;  // B6 (position 59)
+  let maxPosition = 71;  // B7 (position 71)
   
-  // List of all possible notes for the range (C2 to B6)
+  // List of all possible notes for the range (C2 to B7)
   const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   
   // Convert position to note name and octave
   function positionToNote(position) {
     if (position < 0) position = 0;
-    if (position > 59) position = 59;
+    if (position > 71) position = 71;
     
-    const octave = Math.floor(position / 12) + 2;  // Octaves 2-6
+    const octave = Math.floor(position / 12) + 2;  // Octaves 2-7
     const noteIndex = position % 12;
     const noteName = allNotes[noteIndex];
     return noteName + octave;
@@ -156,8 +180,8 @@ function initializeRangeSlider() {
   // Update visual position of knobs
   function updateKnobPositions() {
     const sliderWidth = rangeSlider.offsetWidth;
-    const minPercent = (minPosition / 59) * 100;
-    const maxPercent = (maxPosition / 59) * 100;
+    const minPercent = (minPosition / 71) * 100;
+    const maxPercent = (maxPosition / 71) * 100;
     
     minKnob.style.left = minPercent + '%';
     maxKnob.style.left = maxPercent + '%';
@@ -187,7 +211,7 @@ function initializeRangeSlider() {
       const x = e.clientX - rect.left;
       const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
       
-      let newPosition = Math.round((percent / 100) * 59);
+      let newPosition = Math.round((percent / 100) * 71);
       
       // Ensure positions don't cross
       if (isMin) {
@@ -218,7 +242,7 @@ function initializeRangeSlider() {
       const x = e.touches[0].clientX - rect.left;
       const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
       
-      let newPosition = Math.round((percent / 100) * 59);
+      let newPosition = Math.round((percent / 100) * 71);
       
       // Ensure positions don't cross
       if (isMin) {
@@ -237,9 +261,9 @@ function initializeRangeSlider() {
     });
   }
   
-  // Initialize with default range (C2 to B6)
+  // Initialize with default range (C2 to B7)
   minPosition = 0;   // C2
-  maxPosition = 59;  // B6
+  maxPosition = 71;  // B7
   
   // Initialize sliders
   makeKnobDraggable(minKnob, true);
@@ -249,7 +273,7 @@ function initializeRangeSlider() {
   updateKnobPositions();
   
   // Add debugging for the initialization
-  console.log('Range slider initialized with C2 (0) to B6 (59)');
+  console.log('Range slider initialized with C2 (0) to B7 (71)');
 }
 
 // Add event listener to the tone button when DOM is loaded
