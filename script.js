@@ -2,9 +2,23 @@
 let globalMinPosition = 0;   // C2 (position 0)
 let globalMaxPosition = 71;  // B7 (position 71)
 
+// Global audio context - created on first user interaction
+let audioCtx = null;
+
+// Function to initialize audio context on first user interaction
+function initializeAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    console.log('Audio context initialized');
+  }
+  return audioCtx;
+}
+
+
 // Function to play a scale or arpeggio based on dropdown selection
 function playTone() {
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Initialize audio context on first user interaction if not already initialized
+  const ctx = initializeAudioContext();
   
   // Get exercise type from dropdown
   const exerciseTypeSelect = document.getElementById('exerciseType');
@@ -60,11 +74,11 @@ function playTone() {
   const noteDuration = 0.3; // seconds per note
   const gapBetweenNotes = 0.05; // small gap
   const totalTimePerNote = noteDuration + gapBetweenNotes;
-  let startTime = audioCtx.currentTime + 0.01; // small delay to start
+  let startTime = ctx.currentTime + 0.01; // small delay to start
   
   frequencies.forEach((frequency, index) => {
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
     
     oscillator.type = 'sine';
     oscillator.frequency.setValueAtTime(frequency, startTime);
@@ -75,7 +89,7 @@ function playTone() {
     gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
     
     oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    gainNode.connect(ctx.destination);
     
     oscillator.start(startTime);
     oscillator.stop(startTime + noteDuration);
