@@ -41,17 +41,18 @@ function playTone() {
   const baseFreq = baseFrequencies[pitchClass];
   
   if (exerciseType === 'scale') {
-    // Major scale: Tonic, Second, Third, Fourth, Fifth, Sixth, Seventh, Octave
-    const scaleNotes = [0, 2, 4, 5, 7, 9, 11, 12]; // semitone intervals for major scale
-    frequencies = scaleNotes.map(interval => baseFreq * Math.pow(2, interval/12));
-  } else if (exerciseType === 'arpeggio') {
-    // Major arpeggio: Tonic, Third, Fifth, Octave
-    const arpeggioNotes = [0, 4, 7, 12]; // semitone intervals for major arpeggio
-    frequencies = arpeggioNotes.map(interval => baseFreq * Math.pow(2, interval/12));
-  } else {
-    // Default to middle C
-    frequencies = [baseFreq];
-  }
+      // Major scale: Tonic, Second, Third, Fourth, Fifth, Sixth, Seventh, Octave (ascending then descending)
+      // Create a full pattern that goes up and comes back down to the octave above the starting note
+      const scaleNotes = [0, 2, 4, 5, 7, 9, 11, 12, 11, 9, 7, 5, 4, 2, 0]; // up and down pattern
+      frequencies = scaleNotes.map(interval => baseFreq * Math.pow(2, interval/12));
+    } else if (exerciseType === 'arpeggio') {
+      // Major arpeggio: Tonic, Third, Fifth, Octave
+      const arpeggioNotes = [0, 4, 7, 12, 7, 4, 0]; // semitone intervals for major arpeggio
+      frequencies = arpeggioNotes.map(interval => baseFreq * Math.pow(2, interval/12));
+    } else {
+      // Default to middle C
+      frequencies = [baseFreq];
+    }
   
   // Apply octave adjustment
   frequencies = frequencies.map(freq => freq * Math.pow(2, octave));
