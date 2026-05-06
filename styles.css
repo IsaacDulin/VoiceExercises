@@ -1,3 +1,48 @@
 body {
   font-family: sans-serif;
 }
+
+/* Make buttons larger and more mobile-friendly */
+button {
+  font-size: 18px;
+  padding: 12px 24px;
+  min-height: 48px;
+  min-width: 120px;
+  margin: 8px;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: auto;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:active {
+  background-color: #004085;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  button {
+    font-size: 16px;
+    padding: 10px 20px;
+    min-height: 44px;
+    min-width: 100px;
+    margin: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  button {
+    font-size: 14px;
+    padding: 8px 16px;
+    min-height: 40px;
+    min-width: 80px;
+    margin: 4px;
+  }
+}
