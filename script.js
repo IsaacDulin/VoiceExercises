@@ -371,10 +371,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (toneButton) {
     toneButton.addEventListener('click', playTone);
-    // toneButton.addEventListener('touchend', (event) => {
-    //   event.preventDefault();
-    //   playTone();
-    // });
+    toneButton.addEventListener('touchend', (event) => {
+      event.preventDefault();
+      playTone();
+    });
   }
   
   // Update octave display when slider changes
