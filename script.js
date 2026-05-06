@@ -5,13 +5,29 @@ let globalMaxPosition = 71;  // B7 (position 71)
 // Global audio context - created on first user interaction
 let audioCtx = null;
 
-// Function to play a scale or arpeggio based on dropdown selection
-function playTone() {
+async function unlockAudioContext() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     console.log('Audio context initialized');
   }
-  
+
+  if (audioCtx.state === 'suspended') {
+    console.log('Resuming suspended audio context');
+    await audioCtx.resume();
+  }
+
+  console.log('Audio context state:', audioCtx.state);
+}
+
+// Function to play a scale or arpeggio based on dropdown selection
+async function playTone() {
+  await unlockAudioContext();
+
+  if (!audioCtx || audioCtx.state !== 'running') {
+    console.warn('Audio context is not running:', audioCtx?.state);
+    return;
+  }
+
   // Check if audio context needs to be resumed (common on mobile browsers)
   if (audioCtx && audioCtx.state === 'suspended') {
     console.log('Resuming suspended audio context');
@@ -355,6 +371,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (toneButton) {
     toneButton.addEventListener('click', playTone);
+    // toneButton.addEventListener('touchend', (event) => {
+    //   event.preventDefault();
+    //   playTone();
+    // });
   }
   
   // Update octave display when slider changes
