@@ -98,20 +98,17 @@ function setPitchClassAndOctaveFromPosition(position) {
   // Get note index in the 12-note chromatic scale
   const noteIndex = position % 12;
   const noteName = allNotes[noteIndex];
-
-}
   
-  // Get the dropdown elements
+  return {
+    pitchClass: noteName,
+    octave: octave
+  };
+}
+
 // Function to randomize all selections
 function randomize() {
-  // Get current vocal range positions (C2=0 to B7=71)
-  const minKnob = document.getElementById('minKnob');
-  const maxKnob = document.getElementById('maxKnob');
-  
   // Array of possible values
   const exerciseTypes = ['scale', 'arpeggio'];
-  const pitchClasses = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const octaves = [-2, -1, 0, 1, 2];
   
   // Get the dropdowns and slider
   const exerciseTypeSelect = document.getElementById('exerciseType');
@@ -123,18 +120,21 @@ function randomize() {
     exerciseTypeSelect.value = exerciseTypes[Math.floor(Math.random() * exerciseTypes.length)];
   }
 
+  // Generate a single random number between 0 and 59 for the vocal range
+  const randomPosition = Math.floor(Math.random() * 60); // 0 to 59 inclusive
+  const pitchData = setPitchClassAndOctaveFromPosition(randomPosition);
+  
   if (pitchClassSelect) {
-    pitchClassSelect.value = pitchClasses[Math.floor(Math.random() * pitchClasses.length)];
+    pitchClassSelect.value = pitchData.pitchClass;
   }
 
   if (octaveSlider) {
-    octaveSlider.value = octaves[Math.floor(Math.random() * octaves.length)];
+    octaveSlider.value = pitchData.octave;
     // Update the display value
     const octaveValue = document.getElementById('octaveValue');
     if (octaveValue) {
       octaveValue.textContent = octaveSlider.value;
     }
-
   }
 }
 
