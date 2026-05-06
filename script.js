@@ -1,3 +1,7 @@
+// Global variables to hold vocal range positions
+let globalMinPosition = 0;   // C2 (position 0)
+let globalMaxPosition = 71;  // B7 (position 71)
+
 // Function to play a scale or arpeggio based on dropdown selection
 function playTone() {
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -105,6 +109,14 @@ function setPitchClassAndOctaveFromPosition(position) {
   };
 }
 
+// Function to get current vocal range positions
+function getCurrentVocalRange() {
+  return {
+    min: globalMinPosition,
+    max: globalMaxPosition
+  };
+}
+
 // Function to randomize all selections
 function randomize() {
   // Array of possible values
@@ -120,13 +132,40 @@ function randomize() {
     exerciseTypeSelect.value = exerciseTypes[Math.floor(Math.random() * exerciseTypes.length)];
   }
 
-  // TODO: Get vocal range values from the sliders (not hardcoded like this)
-  const minPosition = 0; // C2 (assuming the minimum is C2)
-  const maxPosition = 71; // B7 (assuming the maximum is B7)
-  
+  // Get vocal range values from global variables
+  const vocalRange = getCurrentVocalRange();
+  const minPosition = vocalRange.min;
+  const maxPosition = vocalRange.max;
 
-  // Use the fixed full range to maintain compatibility with the existing setPitchClassAndOctaveFromPosition function
-  const randomPosition = Math.floor(Math.random() * 60); // 0 to 59 inclusive
+  // Generate a random position within the vocal range
+  // The range should be between minPosition and maxPosition-12 to ensure
+  // exercises start at the lowest note and not exceed one octave above the maximum note
+  const maxAllowedPosition = maxPosition - 12; // Ensure we don't go more than one octave above max
+  const rangeSize = maxAllowedPosition - minPosition + 1;
+  
+  // Make sure we have at least one position to choose from
+  if (rangeSize <= 0) {
+    // Fall back to the full range if constraint is not met
+    const randomPosition = Math.floor(Math.random() * 60); // 0 to 59 inclusive
+    const pitchData = setPitchClassAndOctaveFromPosition(randomPosition);
+    
+    if (pitchClassSelect) {
+      pitchClassSelect.value = pitchData.pitchClass;
+    }
+
+    if (octaveSlider) {
+      octaveSlider.value = pitchData.octave;
+      // Update the display value
+      const octaveValue = document.getElementById('octaveValue');
+      if (octaveValue) {
+        octaveValue.textContent = octaveSlider.value;
+      }
+    }
+    return;
+  }
+  
+  // Generate a random position in the valid range
+  const randomPosition = Math.floor(Math.random() * rangeSize) + minPosition;
   const pitchData = setPitchClassAndOctaveFromPosition(randomPosition);
   
   if (pitchClassSelect) {
@@ -155,8 +194,9 @@ function initializeRangeSlider() {
   
   // Create a solution for 6 octaves: C2 to B7 (6 octaves * 12 notes = 72 positions)
   // But we're going to work with C2 to B7 (which is 6 octaves from C2 to B7)
-  let minPosition = 0;   // C2 (position 0)
-  let maxPosition = 71;  // B7 (position 71)
+  // NOTE: These are now global variables so they can be accessed from randomize()
+  globalMinPosition = 0;   // C2 (position 0)
+  globalMaxPosition = 71;  // B7 (position 71)
   
   // List of all possible notes for the range (C2 to B7)
   const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -174,8 +214,8 @@ function initializeRangeSlider() {
   
   // Update display with current range
   function updateDisplay() {
-    const minNote = positionToNote(minPosition);
-    const maxNote = positionToNote(maxPosition);
+    const minNote = positionToNote(globalMinPosition);
+    const maxNote = positionToNote(globalMaxPosition);
     if (rangeDisplay) {
       rangeDisplay.textContent = `Range: ${minNote} to ${maxNote} (${minNote}-${maxNote})`;
     }
@@ -185,8 +225,8 @@ function initializeRangeSlider() {
   // Update visual position of knobs
   function updateKnobPositions() {
     const sliderWidth = rangeSlider.offsetWidth;
-    const minPercent = (minPosition / 71) * 100;
-    const maxPercent = (maxPosition / 71) * 100;
+    const minPercent = (globalMinPosition / 71) * 100;
+    const maxPercent = (globalMaxPosition / 71) * 100;
     
     minKnob.style.left = minPercent + '%';
     maxKnob.style.left = maxPercent + '%';
@@ -201,82 +241,82 @@ function initializeRangeSlider() {
   }
   
   // Make knobs draggable
-    function makeKnobDraggable(knob, isMin) {
-      let isDragging = false;
+  function makeKnobDraggable(knob, isMin) {
+    let isDragging = false;
     
-      knob.addEventListener('mousedown', function(e) {
-        isDragging = true;
-        e.preventDefault();
-      });
+    knob.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      e.preventDefault();
+    });
     
-      document.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
+    document.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
       
-        const rect = rangeSlider.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      const rect = rangeSlider.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
       
-        let newPosition = Math.round((percent / 100) * 71);
+      let newPosition = Math.round((percent / 100) * 71);
       
-        // Ensure positions don't cross and maintain at least one octave range (12 positions)
-        if (isMin) {
-          // Minimum can't exceed max - 12 positions (one octave)
-          const maxAllowed = maxPosition - 12;
-          if (newPosition >= maxAllowed) newPosition = maxAllowed;
-          minPosition = newPosition;
-        } else {
-          // Maximum can't be less than min + 12 positions (one octave)
-          const minAllowed = minPosition + 12;
-          if (newPosition <= minAllowed) newPosition = minAllowed;
-          maxPosition = newPosition;
-        }
+      // Ensure positions don't cross and maintain at least one octave range (12 positions)
+      if (isMin) {
+        // Minimum can't exceed max - 12 positions (one octave)
+        const maxAllowed = globalMaxPosition - 12;
+        if (newPosition >= maxAllowed) newPosition = maxAllowed;
+        globalMinPosition = newPosition;
+      } else {
+        // Maximum can't be less than min + 12 positions (one octave)
+        const minAllowed = globalMinPosition + 12;
+        if (newPosition <= minAllowed) newPosition = minAllowed;
+        globalMaxPosition = newPosition;
+      }
       
-        updateKnobPositions();
-      });
+      updateKnobPositions();
+    });
     
-      document.addEventListener('mouseup', function() {
-        isDragging = false;
-      });
+    document.addEventListener('mouseup', function() {
+      isDragging = false;
+    });
     
-      // Touch events for mobile support
-      knob.addEventListener('touchstart', function(e) {
-        isDragging = true;
-        e.preventDefault();
-      });
+    // Touch events for mobile support
+    knob.addEventListener('touchstart', function(e) {
+      isDragging = true;
+      e.preventDefault();
+    });
     
-      document.addEventListener('touchmove', function(e) {
-        if (!isDragging) return;
+    document.addEventListener('touchmove', function(e) {
+      if (!isDragging) return;
       
-        const rect = rangeSlider.getBoundingClientRect();
-        const x = e.touches[0].clientX - rect.left;
-        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      const rect = rangeSlider.getBoundingClientRect();
+      const x = e.touches[0].clientX - rect.left;
+      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
       
-        let newPosition = Math.round((percent / 100) * 71);
+      let newPosition = Math.round((percent / 100) * 71);
       
-        // Ensure positions don't cross and maintain at least one octave range (12 positions)
-        if (isMin) {
-          // Minimum can't exceed max - 12 positions (one octave)
-          const maxAllowed = maxPosition - 12;
-          if (newPosition >= maxAllowed) newPosition = maxAllowed;
-          minPosition = newPosition;
-        } else {
-          // Maximum can't be less than min + 12 positions (one octave)
-          const minAllowed = minPosition + 12;
-          if (newPosition <= minAllowed) newPosition = minAllowed;
-          maxPosition = newPosition;
-        }
+      // Ensure positions don't cross and maintain at least one octave range (12 positions)
+      if (isMin) {
+        // Minimum can't exceed max - 12 positions (one octave)
+        const maxAllowed = globalMaxPosition - 12;
+        if (newPosition >= maxAllowed) newPosition = maxAllowed;
+        globalMinPosition = newPosition;
+      } else {
+        // Maximum can't be less than min + 12 positions (one octave)
+        const minAllowed = globalMinPosition + 12;
+        if (newPosition <= minAllowed) newPosition = minAllowed;
+        globalMaxPosition = newPosition;
+      }
       
-        updateKnobPositions();
-      });
+      updateKnobPositions();
+    });
     
-      document.addEventListener('touchend', function() {
-        isDragging = false;
-      });
-    }
+    document.addEventListener('touchend', function() {
+      isDragging = false;
+    });
+  }
   
   // Initialize with default range (C2 to B7)
-  minPosition = 0;   // C2
-  maxPosition = 71;  // B7
+  globalMinPosition = 0;   // C2
+  globalMaxPosition = 71;  // B7
   
   // Initialize sliders
   makeKnobDraggable(minKnob, true);
