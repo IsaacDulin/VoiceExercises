@@ -26,6 +26,19 @@ button:active {
   background-color: #000015;
 }
 
+/* Specific styling for the Randomize and Play button to make it larger */
+#randomizeAndPlayButton {
+  font-size: 20px;
+  padding: 15px 30px;
+  min-height: 56px;
+  min-width: 160px;
+  background-color: #28a745;
+}
+
+#randomizeAndPlayButton:hover {
+  background-color: #218838;
+}
+
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   button {
@@ -34,6 +47,13 @@ button:active {
     min-height: 44px;
     min-width: 100px;
     margin: 6px;
+  }
+  
+  #randomizeAndPlayButton {
+    font-size: 18px;
+    padding: 12px 24px;
+    min-height: 50px;
+    min-width: 140px;
   }
 }
 
@@ -44,5 +64,12 @@ button:active {
     min-height: 40px;
     min-width: 80px;
     margin: 4px;
+  }
+  
+  #randomizeAndPlayButton {
+    font-size: 16px;
+    padding: 10px 20px;
+    min-height: 46px;
+    min-width: 120px;
   }
 }

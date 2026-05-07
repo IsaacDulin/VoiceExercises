@@ -153,7 +153,7 @@ function getCurrentVocalRange() {
 // Function to randomize all selections
 function randomize() {
   // Array of possible values
-  const exerciseTypes = ['scale', 'arpeggio'];
+  const exerciseTypes = ['scale', 'arpeggio', 'slide'];
   
   // Get the dropdowns and slider
   const exerciseTypeSelect = document.getElementById('exerciseType');
@@ -162,7 +162,7 @@ function randomize() {
   
   // Set exercise type randomly (unchanged from original)
   if (exerciseTypeSelect) {
-    exerciseTypeSelect.value = exerciseTypes[Math.floor(Math.random() * exerciseTypes.length)];
+    exerciseTypeSelect.value = exerciseTypes[Math.floor(Math.random() * (exerciseTypes.length))];
   }
 
   // Get vocal range values from global variables
@@ -213,6 +213,12 @@ function randomize() {
       octaveValue.textContent = octaveSlider.value;
     }
   }
+}
+
+// Function to randomize selections and then play tone
+function randomizeAndPlay() {
+  randomize();
+  playTone();
 }
 
 // Function to initialize and handle the range slider
@@ -368,6 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const octaveSlider = document.getElementById('octaveSlider');
   const octaveValue = document.getElementById('octaveValue');
   const randomizeButton = document.getElementById('randomizeButton');
+  const randomizeAndPlayButton = document.getElementById('randomizeAndPlayButton');
   
   if (toneButton) {
     toneButton.addEventListener('click', playTone);
@@ -394,6 +401,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add event listener to randomize button
   if (randomizeButton) {
     randomizeButton.addEventListener('click', randomize);
+  }
+  
+  // Add event listener to randomize and play button
+  if (randomizeAndPlayButton) {
+    randomizeAndPlayButton.addEventListener('click', randomizeAndPlay);
   }
   
   // Initialize range slider
