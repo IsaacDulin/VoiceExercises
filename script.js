@@ -124,20 +124,12 @@ function getCurrentVocalRange() {
   };
 }
 
-// Function to randomize all selections (now using single pitch slider)
+// Function to randomize the starting pitch
 function randomize() {
-  // Array of possible values
-  const exerciseTypes = ['scale', 'arpeggio', 'slide'];
-  
-  // Get the dropdowns and slider
-  const exerciseTypeSelect = document.getElementById('exerciseType');
+
+  // Get the slider
   const startPitchSlider = document.getElementById('startPitch');
   
-  // Set exercise type randomly
-  if (exerciseTypeSelect) {
-    exerciseTypeSelect.value = exerciseTypes[Math.floor(Math.random() * (exerciseTypes.length))];
-  }
-
   // Get vocal range values from global variables
   const vocalRange = getCurrentVocalRange();
   const minPosition = vocalRange.min;
